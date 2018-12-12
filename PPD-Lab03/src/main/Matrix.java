@@ -1,6 +1,10 @@
 package main;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class Matrix
 {
@@ -39,33 +43,36 @@ public class Matrix
             throw new InvalidMatrixOperation("Cannot perform addition: invalid number of Rows & Columns!");
         Matrix result = new Matrix(this.rows, this.columns);
 
-        int poolSize = this.columns * this.rows;
-        AdditionThread[] threadPool = new AdditionThread[poolSize];
-        int threadCounter = 0;
+        long startTime, stopTime, elapsedTime;
+        startTime = System.currentTimeMillis();
+
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool((rows + columns) / 2);
+        List<AdditionThread> runnables = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(this.rows * this.columns);
 
         for (int i = 0; i < result.rows; i++) {
             for (int j = 0; j < result.columns; j++) {
-                threadPool[threadCounter] = new AdditionThread(this.data[i][j], other.data[i][j]);
-                threadPool[threadCounter].start();
-                threadCounter++;
+                AdditionThread worker = new AdditionThread(this.data[i][j], other.data[i][j], latch);
+                runnables.add(worker);
+                executor.execute(worker);
             }
         }
-
-        for (int i = 0; i < threadCounter; i++) {
-            try {
-                threadPool[i].join();
-            } catch (InterruptedException ex) {
-                System.out.println("Addition interrupted!");
-            }
+        try {
+            latch.await();
+        }catch (InterruptedException ex) {
+            System.out.println("main.Matrix addition Interrupted: " + ex.getMessage());
         }
+        executor.shutdown();
 
-        threadCounter = 0;
         for (int i = 0; i < result.rows; i++) {
             for (int j = 0; j < result.columns; j++) {
-                result.data[i][j] = threadPool[threadCounter++].getResult();
+                result.data[i][j] = runnables.get(i*this.getColumns() + j).getResult();
             }
         }
 
+        stopTime = System.currentTimeMillis();
+        elapsedTime = stopTime - startTime;
+        System.out.println("Time: " + elapsedTime + "ms");
         return result;
     }
 
@@ -74,33 +81,36 @@ public class Matrix
             throw new InvalidMatrixOperation("Cannot perform multiplication: invalid number of Rows & Columns!");
         Matrix result = new Matrix(this.rows, other.columns);
 
-        int poolSize = this.rows * other.columns;
-        MultiplicationThread[] threadPool = new MultiplicationThread[poolSize];
-        int threadCounter = 0;
+        long startTime, stopTime, elapsedTime;
+        startTime = System.currentTimeMillis();
+
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool((rows + columns) / 2);
+        List<MultiplicationThread> runnables = new ArrayList<>();
+        CountDownLatch latch = new CountDownLatch(this.rows * other.columns);
 
         for (int i = 0; i < result.rows; i++) {
             for (int j = 0; j < result.columns; j++) {
-                threadPool[threadCounter] = new MultiplicationThread(this, other, i, j);
-                threadPool[threadCounter].start();
-                threadCounter++;
+                MultiplicationThread worker = new MultiplicationThread(this, other, i, j, latch);
+                runnables.add(worker);
+                executor.execute(worker);
             }
         }
-
-        for (int i = 0; i < threadCounter; i++) {
-            try {
-                threadPool[i].join();
-            } catch (InterruptedException ex) {
-                System.out.println("Multiplication interrupted!");
-            }
+        try {
+            latch.await();
+        }catch (InterruptedException ex) {
+            System.out.println("main.Matrix multiplication Interrupted: " + ex.getMessage());
         }
+        executor.shutdown();
 
-        threadCounter = 0;
         for (int i = 0; i < result.rows; i++) {
             for (int j = 0; j < result.columns; j++) {
-                result.data[i][j] = threadPool[threadCounter++].getResult();
+                result.data[i][j] = runnables.get(i*this.getColumns() + j).getResult();
             }
         }
 
+        stopTime = System.currentTimeMillis();
+        elapsedTime = stopTime - startTime;
+        System.out.println("Time: " + elapsedTime + "ms");
         return result;
     }
 
@@ -109,8 +119,9 @@ public class Matrix
             throw new InvalidMatrixOperation("Cannot perform multiplication: invalid number of Rows & Columns!");
         Matrix result = new Matrix(this.rows, other.columns);
 
+        long startTime, stopTime, elapsedTime;
+        startTime = System.currentTimeMillis();
 
-        //Computations
         for (int i = 0; i < this.rows; i++) {
             for (int j = 0; j < other.columns; j++) {
                 for (int k = 0; k < this.columns; k++) {
@@ -119,6 +130,9 @@ public class Matrix
             }
         }
 
+        stopTime = System.currentTimeMillis();
+        elapsedTime = stopTime - startTime;
+        System.out.println("Time: " + elapsedTime + "ms");
         return result;
     }
 
@@ -128,13 +142,18 @@ public class Matrix
             throw new InvalidMatrixOperation("Cannot perform addition: invalid number of Rows & Columns!");
         Matrix result = new Matrix(this.rows, this.columns);
 
-        //Computations
+        long startTime, stopTime, elapsedTime;
+        startTime = System.currentTimeMillis();
+
         for (int i = 0; i < this.rows; i++) {
             for (int j = 0; j < other.columns; j++) {
                 result.data[i][j] = this.getData()[i][j] + other.getData()[i][j];
             }
         }
 
+        stopTime = System.currentTimeMillis();
+        elapsedTime = stopTime - startTime;
+        System.out.println("Time: " + elapsedTime + "ms");
         return result;
     }
 
