@@ -1,28 +1,53 @@
+import problem1.Sequence;
+import problem1.SequenceSumOperation;
+import problem2.BigNumber;
+import problem2.BigNumberAddOperation;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main {
-    public static int[] generateCoefs(int n) {
-        int[] coefs = new int[n];
-        for(int i = 0; i < n; i++) {
-            coefs[i] = (int) (Math.random() * 5 + 1);
-        }
-        return coefs;
-    }
-
     public static void main(String[] args) {
-        int size = 250;
-        int[] coef1 = generateCoefs(size);  //{1, 2, 3, 4, 5};
-        Polynomial p1 = new Polynomial(size, coef1);
-        int[] coef2 = generateCoefs(size);  //{5, -4, 3, -2, 1};
-        Polynomial p2 = new Polynomial(size, coef2);
+        long startTime, stopTime, elapsedTime;
 
-        System.out.println("P1=" + p1.toString());
-        System.out.println("P2=" + p2.toString() + "\n");
+        Sequence sequence = new Sequence(5);
+        System.out.println("Input " + sequence.toString());
+        SequenceSumOperation summed = new SequenceSumOperation(sequence);
 
-        RegularMultiplication mRegular = new RegularMultiplication(p1, p2);
-        System.out.println("Single-threaded O(n^2)=" + mRegular.multiply(true));
-        System.out.println("Multi-threaded O(n^2)=" + mRegular.multiplyMultiTh(true) + "\n");
+        startTime = System.currentTimeMillis();
+        summed.run();
+        stopTime = System.currentTimeMillis();
 
-        KaratsubaMultiplication mKaratsuba = new KaratsubaMultiplication(p1, p2);
-        System.out.println("Single-threaded O(n^2)=" + mKaratsuba.multiply(true));
-        System.out.println("Multi-threaded O(n^2)=" + mKaratsuba.multiplyMultiTh(true));
+        System.out.println("Output " + summed.toString());
+        elapsedTime = stopTime - startTime;
+        System.out.println("Time: " + elapsedTime + "ms\n");
+
+
+        BigNumber number1 = new BigNumber(new ArrayList<Integer>() {{
+            add(7);
+            add(5);
+            add(7);
+            add(8);
+        }});
+        BigNumber number2 = new BigNumber(new ArrayList<Integer>() {{
+            add(7);
+            add(7);
+            add(3);
+            add(9);
+        }});
+//        BigNumber number1 = new BigNumber();
+//        BigNumber number2 = new BigNumber();
+//        int n = 5;
+//        number1.generateDigits(n);
+//        number2.generateDigits(n);
+        BigNumberAddOperation bigSummed = new BigNumberAddOperation(number1, number2);
+
+        startTime = System.currentTimeMillis();
+        bigSummed.run();
+        stopTime = System.currentTimeMillis();
+
+        System.out.println(bigSummed.toString());
+        elapsedTime = stopTime - startTime;
+        System.out.println("Time: " + elapsedTime + "ms\n");
     }
 }
