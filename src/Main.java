@@ -1,42 +1,35 @@
+import mpi.MPI;
+
 public class Main {
-    public static int[][] initMatrix(int size) {
-        int[][] paths = new int[size][size];
-        for(int i = 0; i < size; i++) {
-            for(int j = 0; j < size; j ++) {
-                paths[i][j] = 0;
-            }
+    public static int[] generateCoefs(int n) {
+        int[] coefs = new int[n];
+        for(int i = 0; i < n; i++) {
+            coefs[i] = (int) (Math.random() * 5 + 1);
         }
-        return paths;
+        return coefs;
     }
 
     public static void main(String[] args) {
-        int size = 5;
-        int[][] testPaths = initMatrix(size);
-        //Cycle
-        testPaths[0][1] = 1;
-        testPaths[1][2] = 1;
-        testPaths[2][3] = 1;
-        testPaths[3][4] = 1;
-        testPaths[4][0] = 1;
-        //Other
-        testPaths[1][3] = 1;
-        testPaths[1][4] = 1;
-        testPaths[2][4] = 1;
-        testPaths[0][4] = 1;
-        Graph testGraph = new Graph(size, testPaths);
-
-        System.out.println(testGraph.toString() + '\n');
-
-        CycleSearcher searcher = new CycleSearcher(testGraph);
-
-        long startTime, stopTime, elapsedTime;
-        startTime = System.currentTimeMillis();
-
-        searcher.run();
-
-        stopTime = System.currentTimeMillis();
-        elapsedTime = stopTime - startTime;
-        System.out.println("Time: " + elapsedTime + "ms");
+//        int size = 250;
+//        int[] coef1 = generateCoefs(size);  //{1, 2, 3, 4, 5};
+//        Polynomial p1 = new Polynomial(size, coef1);
+//        int[] coef2 = generateCoefs(size);  //{5, -4, 3, -2, 1};
+//        Polynomial p2 = new Polynomial(size, coef2);
+//
+//        System.out.println("P1=" + p1.toString());
+//        System.out.println("P2=" + p2.toString() + "\n");
+//
+//        RegularMultiplication mRegular = new RegularMultiplication(p1, p2);
+//        System.out.println("Single-threaded O(n^2)=" + mRegular.multiply(true));
+//        System.out.println("Multi-threaded O(n^2)=" + mRegular.multiplyMultiTh(true) + "\n");
+//
+//        KaratsubaMultiplication mKaratsuba = new KaratsubaMultiplication(p1, p2);
+//        System.out.println("Single-threaded O(n^2)=" + mKaratsuba.multiply(true));
+//        System.out.println("Multi-threaded O(n^2)=" + mKaratsuba.multiplyMultiTh(true));
+        MPI.Init(args);
+        int me = MPI.COMM_WORLD.Rank();
+        int size = MPI.COMM_WORLD.Size();
+        System.out.println("Hi peps from process#"+me+" ("+size+")");
+        MPI.Finalize();
     }
-
 }
