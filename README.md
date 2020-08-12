@@ -20,4 +20,11 @@ Results for rank 100 polynomials: <br/>
 ### Lab03 - Multiplication - C#, Java, C++
 ### Lab02 - Matrix addition
 
+**Learned:**
+* Implementing Multithreading in Java, C++, C# 
+* C# TPL
+* Java Futures
+* MPI
+* Data Decompositoin
+
 
